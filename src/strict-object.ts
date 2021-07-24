@@ -1,47 +1,84 @@
-import { DeepPartial } from './types';
+import { DeepPartial } from "./types";
 
-
-export type StrictObjectOptions = {
-  name: string;
+export type StrictObjectConfig = {
   shallow?: boolean;
-  frozen?: boolean;
-}
+  throwOnSet?: boolean;
+};
 
-const wrapperCache = new WeakMap<object, unknown>();
+const cache = new WeakMap<object, unknown>();
 
-export const strictObject = <T>(object: DeepPartial<T>, options: StrictObjectOptions = { name: 'strictObject' }): T => {
-  if (typeof Proxy === 'undefined') return object as T;
+const isStrictObjectSymbol = Symbol("isStrictObjectSymbol");
 
-  return new Proxy(object, {
+export function strictObject<T>(
+  object: DeepPartial<T>,
+  name: string = "strictObject",
+  config?: StrictObjectConfig
+): T {
+  if (typeof Proxy === "undefined") {
+    // Nothing we can do here!
+    return object as T;
+  }
+
+  // Return from cache, if possible:
+  if (isStrictObject(object)) {
+    return object as T;
+  }
+  if (cache.has(object)) {
+    return cache.get(object) as T;
+  }
+
+  const proxyHandler: ProxyHandler<DeepPartial<T>> = {
     get(target, p, receiver: any): any {
+      if (p === isStrictObjectSymbol) return isStrictObjectSymbol;
+
       // Here's the magic:
       if (!(p in target)) {
-        throw new ReferenceError(`${options.name}.${String(p)} is not defined`);
+        const error = new ReferenceError(`${name}.${String(p)} is not defined`);
+        Error.captureStackTrace(error, proxyHandler.get);
+        throw error;
       }
 
       // Let's return the value (wrapped, if necessary)
       const value = target[p as keyof T] as object;
 
-      if (options.shallow) return value;
+      if (config?.shallow) return value;
 
       // Primitive types should be returned as-is:
-      const isWrappable = (typeof value === 'object' && value !== null) || typeof value === 'function';
+      const isWrappable =
+        (typeof value === "object" && value !== null) ||
+        typeof value === "function";
       if (!isWrappable) return value;
 
-      // Return from cache, if possible:
-      if (wrapperCache.has(value)) return wrapperCache.get(value);
-
       // Wrap the nested object:
-      const newName = `${options.name}.${String(p)}`;
-      const wrapped = strictObject(value, { ...options, name: newName });
-      wrapperCache.set(value, wrapped);
-      return wrapped;
+      const newName = `${name}.${String(p)}`;
+      return strictObject(value, newName, config);
     },
-    set: !options.frozen ? undefined : (target, p, value: any, receiver: any): boolean => {
-      target[p as keyof T] = value;
-      return true;
-    },
-  }) as T;
-};
+    set: !config?.throwOnSet
+      ? undefined
+      : (target, p, value: any, receiver: any): boolean => {
+          if (!(p in target)) {
+            const error = new ReferenceError(
+              `${name}.${String(p)} is not defined`
+            );
+            Error.captureStackTrace(error, proxyHandler.set);
+            throw error;
+          }
+          target[p as keyof T] = value;
+          return true;
+        },
+  };
+  const wrapper = new Proxy(object, proxyHandler) as T;
+
+  cache.set(object, wrapper);
+
+  return wrapper;
+}
+
+export function isStrictObject(object: unknown): boolean {
+  if (typeof object === "object" && object !== null) {
+    return (object as any)[isStrictObjectSymbol] === isStrictObjectSymbol;
+  }
+  return false;
+}
 
 export default strictObject;
