@@ -3,6 +3,7 @@ import { DeepPartial } from "./types";
 export type StrictObjectConfig = {
   shallow?: boolean;
   throwOnSet?: boolean;
+  ignore?: Array<string | number | symbol>;
 };
 
 const cache = new WeakMap<object, unknown>();
@@ -31,6 +32,9 @@ export function strictObject<T>(
     get(target, p, receiver: any): any {
       if (p === isStrictObjectSymbol) return isStrictObjectSymbol;
 
+      // Ignore certain props:
+      if (config?.ignore?.includes(p)) return target[p as keyof T];
+
       // Here's the magic:
       if (!(p in target)) {
         const error = new ReferenceError(`${name}.${String(p)} is not defined`);
@@ -56,7 +60,7 @@ export function strictObject<T>(
     set: !config?.throwOnSet
       ? undefined
       : (target, p, value: any, receiver: any): boolean => {
-          if (!(p in target)) {
+          if (!(p in target) && config?.ignore?.includes(p)) {
             const error = new ReferenceError(
               `${name}.${String(p)} is not defined`
             );
