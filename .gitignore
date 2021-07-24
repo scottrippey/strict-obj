@@ -3,3 +3,6 @@ node_modules
 
 # IDE
 .idea
+
+# Dist files:
+dist/
