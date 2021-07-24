@@ -9,9 +9,9 @@ npm install strict-obj
 
 # Usage
 ```js
-import strictObj from 'strict-obj';
+import strictObject from 'strict-obj';
 
-const data = strictObj({ one: "ONE", two: 2 });
+const data = strictObject({ one: "ONE", two: 2 });
 
 // Access properties normally:
 console.log(data.one, data.two) // "ONE 2"
