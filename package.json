@@ -4,7 +4,7 @@
   "description": "A JavaScript object wrapper, that throws errors if you try to access not-defined properties.",
   "main": "dist/strict-obj.js",
   "files": [
-    "src", "dist"
+    "src", "dist", "jest"
   ],
   "scripts": {
     "test": "jest",

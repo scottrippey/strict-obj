@@ -1,4 +1,4 @@
-import { strictObject } from "./strict-object-jest";
+import { strictObject } from "./strict-object";
 
 type TestData = {
   one: number;
