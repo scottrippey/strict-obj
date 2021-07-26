@@ -77,6 +77,7 @@ export function strictObject<T>(
 
   return wrapper;
 }
+export default strictObject;
 
 export function isStrictObject(object: unknown): boolean {
   if (typeof object === "object" && object !== null) {
@@ -85,4 +86,19 @@ export function isStrictObject(object: unknown): boolean {
   return false;
 }
 
-export default strictObject;
+export function mergeConfigs(
+  configA: StrictObjectConfig | undefined,
+  configB: StrictObjectConfig | undefined
+): StrictObjectConfig | undefined {
+  if (!configA) return configB;
+  if (!configB) return configA;
+
+  const result = {
+    ...configA,
+    ...configB,
+  };
+  if (configA.ignore && configB.ignore) {
+    result.ignore = [...configA.ignore, ...configB.ignore];
+  }
+  return result;
+}

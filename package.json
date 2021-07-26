@@ -4,9 +4,12 @@
   "description": "A JavaScript object wrapper, that throws errors if you try to access not-defined properties.",
   "main": "dist/strict-obj.js",
   "files": [
-    "src", "dist", "jest"
+    "src",
+    "dist",
+    "jest"
   ],
   "scripts": {
+    "doctoc": "doctoc README.md",
     "test": "jest",
     "test:watch": "jest --watch",
     "build": "npm run clean && tsc",
@@ -29,6 +32,7 @@
   "devDependencies": {
     "@types/jest": "^26.0.24",
     "babel-loader": "^8.2.2",
+    "doctoc": "^2.0.1",
     "jest": "^27.0.6",
     "prettier": "^2.3.2",
     "ts-jest": "^27.0.4",
