@@ -1,4 +1,5 @@
 import { DeepPartial } from "./types";
+export { DeepPartial };
 
 export type StrictObjectConfig = {
   shallow?: boolean;
