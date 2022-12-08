@@ -3,6 +3,7 @@ import { DeepPartial } from "./types";
 export type StrictObjectConfig = {
   shallow?: boolean;
   throwOnSet?: boolean;
+  ignore?: Array<string | number | symbol>;
 };
 
 const cache = new WeakMap<object, unknown>();
@@ -31,6 +32,9 @@ export function strictObject<T>(
     get(target, p, receiver: any): any {
       if (p === isStrictObjectSymbol) return isStrictObjectSymbol;
 
+      // Ignore certain props:
+      if (config?.ignore?.includes(p)) return target[p as keyof T];
+
       // Here's the magic:
       if (!(p in target)) {
         const error = new ReferenceError(`${name}.${String(p)} is not defined`);
@@ -56,7 +60,7 @@ export function strictObject<T>(
     set: !config?.throwOnSet
       ? undefined
       : (target, p, value: any, receiver: any): boolean => {
-          if (!(p in target)) {
+          if (!(p in target) && config?.ignore?.includes(p)) {
             const error = new ReferenceError(
               `${name}.${String(p)} is not defined`
             );
@@ -73,6 +77,7 @@ export function strictObject<T>(
 
   return wrapper;
 }
+export default strictObject;
 
 export function isStrictObject(object: unknown): boolean {
   if (typeof object === "object" && object !== null) {
@@ -81,4 +86,19 @@ export function isStrictObject(object: unknown): boolean {
   return false;
 }
 
-export default strictObject;
+export function mergeConfigs(
+  configA: StrictObjectConfig | undefined,
+  configB: StrictObjectConfig | undefined
+): StrictObjectConfig | undefined {
+  if (!configA) return configB;
+  if (!configB) return configA;
+
+  const result = {
+    ...configA,
+    ...configB,
+  };
+  if (configA.ignore && configB.ignore) {
+    result.ignore = [...configA.ignore, ...configB.ignore];
+  }
+  return result;
+}

@@ -34,7 +34,7 @@ describe("strictObject", () => {
       expect(data.two).toEqual("t-w-o");
     });
 
-    it("should not allow access to non-defined properties", () => {
+    it("should not allow getting non-defined properties", () => {
       expect(() => data.three).toThrowErrorMatchingInlineSnapshot(
         `"strictObject.three is not defined"`
       );
@@ -44,6 +44,12 @@ describe("strictObject", () => {
       data.three = { a: "A", b: "B" };
       expect(data.three.a).toEqual("A");
       expect(data.three.b).toEqual("B");
+    });
+
+    it("'in' operator should still work", () => {
+      expect("one" in data).toBeTruthy();
+      expect("three" in data).toBeFalsy();
+      expect("nested" in data).toBeTruthy();
     });
   });
 
@@ -131,6 +137,46 @@ describe("strictObject", () => {
       expect(() => data.nested.nested.one).toThrowErrorMatchingInlineSnapshot(
         `"strictObject.one is not defined"`
       );
+    });
+  });
+
+  describe("ignore", () => {
+    let data: TestData;
+    beforeEach(() => {
+      data = strictObject<TestData>(
+        {
+          one: 1,
+          nested: { one: 111 },
+        },
+        "data",
+        {
+          ignore: ["two", "INVALID"],
+        }
+      );
+    });
+
+    it("can get ignored properties", () => {
+      expect(() => data.one).not.toThrow();
+      expect(() => data.two).not.toThrow();
+      expect(() => data.three).toThrow();
+      expect(() => data.nested.two).not.toThrow();
+      expect(() => data.nested.three).toThrow();
+
+      expect(data.two).toEqual(undefined);
+      expect(data.nested.two).toEqual(undefined);
+
+      // @ts-ignore
+      expect(data.INVALID).toEqual(undefined);
+      // @ts-ignore
+      expect(data.nested.INVALID).toEqual(undefined);
+    });
+
+    it("can set ignored properties", () => {
+      expect(() => (data.two = "TWO")).not.toThrow();
+      expect(data.two).toEqual("TWO");
+      // @ts-ignore
+      delete data.two;
+      expect(data.two).toEqual(undefined);
     });
   });
 });
