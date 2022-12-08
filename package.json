@@ -2,7 +2,7 @@
   "name": "strict-obj",
   "version": "0.9.1",
   "description": "A JavaScript object wrapper, that throws errors if you try to access not-defined properties.",
-  "main": "dist/strict-obj.js",
+  "main": "./dist/strict-object.js",
   "files": [
     "src",
     "dist",
