@@ -33,6 +33,8 @@ jobs:
       - run: ${{ matrix.command }}
 
   release:
+    name: "Changesets"
+    runs-on: ubuntu-latest
     needs:
       - test
     steps:
