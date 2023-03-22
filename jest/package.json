@@ -1,0 +1,3 @@
+{
+  "main": "../dist/jest/strict-object.js"
+}
