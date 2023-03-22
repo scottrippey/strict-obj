@@ -8,6 +8,7 @@ export {
   isStrictObject,
   mergeConfigs,
   StrictObjectConfig,
+  DeepPartial,
 } from "../strict-object";
 
 export const jestConfig = {
