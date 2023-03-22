@@ -15,6 +15,7 @@
     "build": "npm run clean && tsc",
     "clean": "rm -rf dist",
     "build:watch": "tsc --watch",
+    "changeset": "changeset",
     "prepublishOnly": "npm run test && npm run build",
     "preversion": "npm run test && npm run build"
   },
@@ -30,6 +31,7 @@
   },
   "homepage": "https://github.com/scottrippey/strict-obj#readme",
   "devDependencies": {
+    "@changesets/cli": "^2.26.0",
     "@types/jest": "^26.0.24",
     "babel-loader": "^8.2.2",
     "doctoc": "^2.0.1",
