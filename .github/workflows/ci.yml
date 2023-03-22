@@ -33,6 +33,7 @@ jobs:
       - run: ${{ matrix.command }}
 
   release:
+    if: github.ref_name == 'main'
     name: "Changesets"
     runs-on: ubuntu-latest
     needs:
